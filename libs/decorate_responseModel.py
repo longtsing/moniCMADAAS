@@ -8,7 +8,6 @@ import orjson
 from fastapi import FastAPI, applications, Request, Response, Depends, Header, Query
 from models.base import responseModel
 from datetime import datetime, timedelta
-from configs import compressConfig
 
 def decorate_responseModel(func):
     '''
@@ -32,27 +31,30 @@ def decorate_responseModel(func):
         @functools.wraps(func)
         async def async_wrapper(
             *args, **kwargs
-        ) -> responseModel:
-            
+        ) -> responseModel:            
             
             datetime_start = datetime.now()
-            response_code = 200
+            response_code = '0'
             try:
                 response = await func(*args, **kwargs)
             except Exception as e:
                 response = str(e)
-                response_code = 500
+                response_code = '-1'
             datetime_end = datetime.now()
 
             if(not isinstance(response, responseModel)):
                 repM = responseModel(
-                    code=response_code,
-                    data=response,
-                    costs=round((datetime_end - datetime_start).total_seconds() * 1000, 2)
+                    returnCode=response_code,
+                    DS=response,
+                    requestTime=datetime_start.strftime('%Y-%m-%d %H:%M:%S'),
+                    responseTime=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    takeTime=round((datetime_end - datetime_start).total_seconds(), 3)
                 )
                 return repM
             else:
-                response.costs = round((datetime_end - datetime_start).total_seconds() * 1000, 2)
+                response.requestTime=datetime_start.strftime('%Y-%m-%d %H:%M:%S')
+                response.responseTime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                response.takeTime = round((datetime_end - datetime_start).total_seconds() , 3)
                 return response
 
         async_wrapper.__signature__ = new_sig
@@ -62,46 +64,31 @@ def decorate_responseModel(func):
         # 同步函数装饰器
         @functools.wraps(func)
         def sync_wrapper(
-                x_use_gzip: typing.Annotated[str, Header(description="如果您希望响应被 Gzip 压缩，请将此标题设置为True，否则，设置为False")] = 'false',
                 *args, **kwargs
         ) -> responseModel:
-            use_gzip = compressConfig.defaultCompress
-            if compressConfig.defaultCompress:
-                if x_use_gzip.lower() == 'false':
-                    use_gzip = False
-            else:
-                if x_use_gzip.lower() == 'true':
-                    use_gzip = True
-            
             datetime_start = datetime.now()
-            response_code = 200
+            response_code = '0'
             try:
                 # 直接调用同步函数，不使用 await
                 response = func(*args, **kwargs)
-                if(isinstance(response, responseModel)):
-                    if(use_gzip):
-                        response.data = compressConfig.CompressFunc(response.data)
-                else:
-                    if(use_gzip):
-                        response = compressConfig.CompressFunc(response)
             except Exception as e:
                 response = str(e)
-                response_code = 500
+                response_code = '-1'
             datetime_end = datetime.now()
 
             if(not isinstance(response, responseModel)):
                 repM = responseModel(
-                    code=response_code,
-                    data=response,
-                    costs=round((datetime_end - datetime_start).total_seconds() * 1000, 2)
+                    returnCode=response_code,
+                    DS=response,
+                    requestTime=datetime_start.strftime('%Y-%m-%d %H:%M:%S'),
+                    responseTime=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    takeTime=round((datetime_end - datetime_start).total_seconds() , 3)
                 )
-                if(use_gzip):
-                    repM.compressMethod = compressConfig.CompressFunc.__name__
                 return repM
             else:
-                response.costs = round((datetime_end - datetime_start).total_seconds() * 1000, 2)
-                if(use_gzip):
-                    response.compressMethod = compressConfig.CompressFunc.__name__
+                response.requestTime=datetime_start.strftime('%Y-%m-%d %H:%M:%S')
+                response.responseTime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                response.takeTime = round((datetime_end - datetime_start).total_seconds() , 3)
                 return response
 
         sync_wrapper.__signature__ = new_sig
