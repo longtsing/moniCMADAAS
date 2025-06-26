@@ -1,5 +1,5 @@
-# 模拟天擎项目
-模拟天擎API接口，提供气象数据服务
+# 气象大数据云平台（天擎）模拟及MCP服务项目
+模拟天擎API接口，提供气象数据服务；基于模拟API、nmc_met_io、FastMCP开发天擎数据获取MCPServer（SSE协议）
 
 ## contributors
 longtsing
@@ -17,13 +17,15 @@ longtsing
 - test : 开发时的一些测试 jupyter 代码
 - examples : 基于 nmc_met_io 如何调用获取数据的测试 jupyter 案例
 
-main.py 是程序的入口
+main.py 是模拟天擎的程序的入口
+
+MCP 文件夹下是基于 FastMCP 开发的天擎数据获取MCPServer（SSE协议）
 
 ## 环境搭建
 由于使用了部分编译后的资源，所以选择采用 mamba 或 conda 管理运行环境
 ```shell
 mamba create -n fastapi python==3.11.11 fastapi uvicorn pydantic orjson ujson msgpack-python cryptography pyjwt redis-py urllib3 aiohttp httpx sqlmodel sqlacodegen mysql-connector-python cassandra-driver numpy pandas xarray geopandas scipy cartopy matplotlib cnmaps metpy cython numba  nb_conda  -c conda-forge -y
-pip install cinrad  pyxxl
+pip install cinrad  pyxxl fastmcp nmc_met_io
 # linux 下
 pip install uvloop
 mamba install libuv xemsf -c conda-forge -y
@@ -39,7 +41,7 @@ fastapi dev main.py
 运行模式
 ```shell
 nohup uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 &
-nohup fastapi run main.py --reload --host 0.0.0.0 --port 8000 --workers 4 &
+nohup fastapi run main.py --reload --host 0.0.0.0 --port 8000 --workers 4 > ./web.log 2>&1 &
 ```
 ## 防火墙开关
 linux 下 firewalld 防火墙

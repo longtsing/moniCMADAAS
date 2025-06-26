@@ -12,6 +12,8 @@ import dateutil.rrule
 import functools
 
 stations=pd.read_csv(os.path.abspath(os.path.dirname(__file__)+'/../')+'/datas/Stations.csv', encoding='utf-8')
+for c in ['Station_Id_C', 'Province', 'City', 'Cnty', 'Town','Admin_Code_CHN', 'Town_code', 'ProvinceCode', 'CityCode', 'CntyCode',]:
+    stations[c]=stations[c].apply(lambda x:str(x))
 elementDict={
     "Station_Id_C": {"name": "区站号(字符)", "unit": "-"},
     "Station_levl": {"name": "测站级别", "unit": "标识/代码表"},
@@ -350,7 +352,7 @@ def getSurfEleInRegionByTime(**kwargs):
         )
     if repM is None:
         times=times.split(',')
-        adminCodes=list(map(int,adminCodes.split(',')))
+        adminCodes=adminCodes.split(',')
         stations_filtered0 = stations.copy()
         stations_filtered0=stations_filtered0[(stations_filtered0['ProvinceCode'].isin(adminCodes))|(stations_filtered0['CityCode'].isin(adminCodes))|(stations_filtered0['CntyCode'].isin(adminCodes))]
         print(f"筛选后的站点数量: {len(stations_filtered0)}")
@@ -362,7 +364,7 @@ def getSurfEleInRegionByTime(**kwargs):
             stations_filtered=stations_filtered0.copy()
             data = {}
             for element in elements:
-                data[element] = np.round(np.random.randn(len(stations_filtered)),1)
+                data[element] = np.round(np.random.randint(0,100,size=len(stations_filtered))/10,1)
             
             data= pd.DataFrame(data,index=stations_filtered.index)   
             data=pd.concat([stations_filtered, data], axis=1)     
@@ -445,7 +447,7 @@ def getSurfEleInRectByTime(**kwargs):
             stations_filtered=stations_filtered0.copy()
             data = {}
             for element in elements:
-                data[element] = np.round(np.random.randn(len(stations_filtered)),1)
+                data[element] = np.round(np.random.randint(0,100,size=len(stations_filtered))/10,1)
             
             data= pd.DataFrame(data,index=stations_filtered.index)   
             data=pd.concat([stations_filtered, data], axis=1)  
@@ -511,7 +513,7 @@ def getSurfEleByTimeAndStaID(**kwargs):
     if repM is None:
         times=times.split(',')
         stations_filtered0 = stations.copy()
-        staIds=list(map(int,staIds.split(',')))
+        staIds=staIds.split(',')
         stations_filtered0=stations_filtered0[stations_filtered0['Station_Id_C'].isin(staIds)]
         print(f"筛选后的站点数量: {len(stations_filtered0)}")
         elements=list(set(elements0.split(','))-set(stations_filtered0.columns)-set(['Datetime']))
@@ -522,7 +524,7 @@ def getSurfEleByTimeAndStaID(**kwargs):
             stations_filtered=stations_filtered0.copy()
             data = {}
             for element in elements:
-                data[element] = np.round(np.random.randn(len(stations_filtered)),1)
+                data[element] = np.round(np.random.randint(0,100,size=len(stations_filtered))/10,1)
             
             data= pd.DataFrame(data,index=stations_filtered.index)   
             data=pd.concat([stations_filtered, data], axis=1)     
@@ -606,7 +608,7 @@ def getSurfEleByTimeRangeAndStaID(**kwargs):
         ))
         times=times[:100]  # 限制查询时间范围为100天内
         stations_filtered0 = stations.copy()
-        staIds=list(map(int,staIds.split(',')))
+        staIds=staIds.split(',')
         stations_filtered0=stations_filtered0[stations_filtered0['Station_Id_C'].isin(staIds)]
         print(f"筛选后的站点数量: {len(stations_filtered0)}")
         elements=list(set(elements0.split(','))-set(stations_filtered0.columns)-set(['Datetime']))
@@ -616,7 +618,7 @@ def getSurfEleByTimeRangeAndStaID(**kwargs):
             stations_filtered=stations_filtered0.copy()
             data = {}
             for element in elements:
-                data[element] = np.round(np.random.randn(len(stations_filtered)),1)
+                data[element] = np.round(np.random.randint(0,100,size=len(stations_filtered))/10,1)
             
             data= pd.DataFrame(data,index=stations_filtered.index)   
             data=pd.concat([stations_filtered, data], axis=1)     
